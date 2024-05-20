@@ -38,21 +38,19 @@ if (!empty($_POST)) {
     <title>アカウント作成</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="">
     <div class="content">
-        <form action="" method="POST">
+        <form action="" method="POST" class="form">
             <h1>アカウント作成</h1>
             <p>当サービスをご利用するために、次のフォームに必要事項をご記入ください。</p>
             <br>
 
             <div class="control">
-                <label for="name">ユーザー名</label>
-                <input id="name" type="text" name="name">
+                <input id="name" type="text" name="name" placeholder="ユーザー名">
             </div>
 
             <div class="control">
-                <label for="email">メールアドレス<span class="required">必須</span></label>
-                <input id="email" type="email" name="email">
+                <input id="email" type="email" name="email" placeholder="メールアドレス">
                 <?php if (!empty($error["email"]) && $error['email'] === 'blank'): ?>
                     <p class="error">＊メールアドレスを入力してください</p>
                 <?php elseif (!empty($error["email"]) && $error['email'] === 'duplicate'): ?>
@@ -61,8 +59,7 @@ if (!empty($_POST)) {
             </div>
 
             <div class="control">
-                <label for="password">パスワード<span class="required">必須</span></label>
-                <input id="password" type="password" name="password">
+                <input id="password" type="password" name="password" placeholder="パスワード">
                 <?php if (!empty($error["password"]) && $error['password'] === 'blank'): ?>
                     <p class="error">＊パスワードを入力してください</p>
                 <?php endif ?>
