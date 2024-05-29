@@ -1,12 +1,10 @@
 <?php
 require("./dbconnect.php");
 session_start();
-
 if (!isset($_SESSION['join'])) {
     header('Location: entry.php');
     exit();
 }
-
 if (!empty($_POST['check'])) {
     $hash = password_hash($_SESSION['join']['password'], PASSWORD_BCRYPT);
 
@@ -16,7 +14,6 @@ if (!empty($_POST['check'])) {
         $_SESSION['join']['email'],
         $hash
     ));
-
     unset($_SESSION['join']); 
     header('Location: thank.php');
 }
@@ -39,17 +36,14 @@ if (!empty($_POST['check'])) {
                 <p class="error">＊会員登録に失敗しました。</p>
             <?php endif ?>
             <hr>
-
             <div class="control">
                 <p>ニックネーム</p>
                 <p><span class="fas fa-angle-double-right"></span> <span class="check-info"><?php echo htmlspecialchars($_SESSION['join']['name'], ENT_QUOTES); ?></span></p>
             </div>
-
             <div class="control">
                 <p>メールアドレス</p>
                 <p><span class="fas fa-angle-double-right"></span> <span class="check-info"><?php echo htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES); ?></span></p>
             </div>
-            
             <br>
             <a href="entry.php" class="back-btn">変更する</a>
             <button type="submit" class="btn next-btn">登録する</button>

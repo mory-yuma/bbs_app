@@ -1,18 +1,15 @@
 <?php 
 require("./dbconnect.php");
 session_start();
-
 if (!isset($_SESSION['user_id'])) {
     header('Location: index.php'); 
     exit();
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['rename'])) {
     $new_name = trim($_POST['rename']);
     if ($new_name !== '') {
         $statement = $db->prepare('UPDATE members SET name = ? WHERE id = ?');  
         $statement->execute([$new_name, $_SESSION['user_id']]);
-
         $_SESSION['user_name'] = $new_name;
         header('Location: index.php'); 
         exit();
@@ -22,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['rename'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
