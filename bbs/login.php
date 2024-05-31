@@ -26,24 +26,6 @@ if (!empty($_POST)) {
             echo "ログインできませんでした。";
         }
     }    
-// password_hash関数は内部的に生成されるソルト（salt）を用いてハッシュを生成します。これにより、
-// 同じパスワードでも異なるハッシュが生成されるため、データベース内のハッシュ化されたパスワードと、ログイン時に入力されたパスワードのハッシュは異なります。
-//     if (empty($error)) {
-//         $statement = $db->prepare('SELECT * FROM members WHERE name=? AND email=? AND password=?');
-//         $hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
-//         $statement->execute([$_POST['name'], $_POST['email'], $hash]);
-//         $member = $statement->fetch(PDO::FETCH_ASSOC);
-
-//         if (($member)) {
-//             $_SESSION['user_id'] = $member['id'];
-//             $_SESSION['user_name'] = $member['name'];
-//             header('Location: index.php'); 
-//             exit();
-//         } else {
-//             $error['login'] = "failed";
-//             echo "ログインできませんでした。";
-//         }
-//     }
 }
 ?>
 <!DOCTYPE html>
