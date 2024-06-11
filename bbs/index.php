@@ -12,49 +12,32 @@ try {
 } catch (PDOException $e) {
     echo $e->errorInfo();
 }
-// PDOException - PDO が発するエラーを表します。
-// getMessage — 例外メッセージを取得する
-
-
-
-
-
-
-//書き込みを押した時
 if (!empty($_POST["submitButton"])) {
     //画像をupload
     if (!empty($_FILES['image']['name'])) {
         $errors = array();
-
-
         // アップロードされたファイルの情報を取得
         //$_FILES['input_name']['fileの情報']
         $file_name = $_FILES['image']['name'];//uploadされたファイルのファイル名
         $file_size = $_FILES['image']['size'];//ファイルサイズ
         $file_tmp = $_FILES['image']['tmp_name'];//サーバーへ仮アップロードされたディレクトリとファイル名？
         $file_type = $_FILES['image']['type'];//ファイルの形式「png」「jpeg」等
-
-
         // アップロードされたファイルの拡張子を取得
         $file_ext = strtolower(end(explode('.', $_FILES['image']['name'])));//ex.pngをupした場合、「png」を取得
         //explode - 分割し配列に変換  end - 最後の要素を取得  strtolower - 取得した文字を小文字に変換
-
         // 許可する拡張子を定義
         $extensions = array("jpeg", "jpg", "png");
-
         // 拡張子のチェック
         if (in_array($file_ext, $extensions) === false) {
             $errors[] = "このファイル形式は許可されていません。jpeg, jpg, pngファイルのみアップロードできます。";
             $error_messages["invalidimageuploadtype"] = "このファイル形式は許可されていません。jpeg, jpg, pngファイルのみアップロードできます。";
         }
-
         // ファイルサイズのチェック（例：1MB以下）
         if ($file_size > 1048576) {
             $errors[] = 'ファイルサイズが大きすぎます。1MB以下のファイルのみアップロードできます。';
             $error_messages["invalidimageuploadtype"] = 'ファイルサイズが大きすぎます。1MB以下のファイルのみアップロードできます。';
 
         }
-
         // エラーがない場合、ファイルを指定されたディレクトリに保存
         if (empty($errors)) {
             $image_path = "uploads/" . $file_name;
@@ -64,7 +47,6 @@ if (!empty($_POST["submitButton"])) {
             print_r($errors);
         }
     }
-
     //名前のチェック
     if (empty($_SESSION["user_name"])) {
         echo "ログインしてください";
@@ -75,69 +57,53 @@ if (!empty($_POST["submitButton"])) {
         echo "コメントを入力してください。";
         $error_messages["comment"] = "コメントを入力してください";
     }
-
     if (empty($error_messages)) {
         $postDate = date("Y-m-d H:i:s");
-
         try {
-            $stmt = $pdo->prepare("INSERT INTO `bbs-table` (`username`, `comment`, `postDate`, `image_path`) VALUES (:username, :comment, :postDate, :image_path);");
+            $stmt = $pdo->prepare("INSERT INTO `bbs-table` (`username`, `comment`, `postDate`, `image_path`, `user_id`) VALUES (:username, :comment, :postDate, :image_path, :user_id);");
             $stmt->bindParam(':username', $_SESSION['user_name'], PDO::PARAM_STR);
             $stmt->bindParam(':comment', $_POST["comment"], PDO::PARAM_STR);
             $stmt->bindParam(':postDate', $postDate, PDO::PARAM_STR);
             $stmt->bindParam(':image_path', $image_path, PDO::PARAM_STR);
-
+            $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
             $stmt->execute();
+            print_r($stmt->errorInfo());
         } catch (PDOException $e) {
             echo $e->errorInfo();
         }
     }
+    if(!empty($_POST['commentDelete'])) {
+        header('location: commentDelete.php');
+    }
 }
-
 //DBからコメントデータを取得
 $sql = "SELECT id, username, comment, postDate FROM `bbs-table`;";
 $comment_array = $pdo->query($sql);
-
-
 // 全データの件数を取得
-$sql = "SELECT COUNT(*) FROM `bbs-table`";//COUNT - 項目のレコード数を取得
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
-$total = $stmt->fetchColumn();//totalにはbbs-tableの総レコード数が入っている。fetchColumn - 取得した結果から最初のカラムの値を返す？？？
-
+$total = count($comment_array);
 // ページサイズとページ番号を設定
 $pageSize = 5;
-$pageNum = isset($_GET['page']) ? $_GET['page'] : 1;
-
+$pageNum = isset($_GET['page']) ? $_GET['page'] : 1;//trueなら['page']の値をfalseなら1を返す。
 // データの取得範囲を計算
 $offset = ($pageNum - 1) * $pageSize;
-
 // データの取得
 $sql = "SELECT * FROM `bbs-table` LIMIT $offset, $pageSize";//データベースから取得するデータの範囲を制限する
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);//fetchAll - QLクエリの実行結果から全ての行を取得する PDO::FETCH_ASSOC - 連想配列として取得（idとか）
-
 // ページリンクの生成
 $prevPageLink = $pageNum > 1 ? '?page=' . ($pageNum - 1) : '';
 $nextPageLink = $pageNum < ceil($total / $pageSize) ? '?page=' . ($pageNum + 1) : '';//ceil - 引数数値を小数点以下を切り上げて整数
-
-
     // ページ番号一覧の生成
     $pageList = range(1, ceil($total / $pageSize));
-
-
-
-
-    //DBの接続を閉じる
     $pdo = null;
 ?>
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/bbs/style.css">
+    <link rel="stylesheet" href="style.css">
     <title>PHP掲示板</title>
     <script>
     function confirmLogout() {
@@ -181,6 +147,12 @@ $nextPageLink = $pageNum < ceil($total / $pageSize) ? '?page=' . ($pageNum + 1) 
                         <?php if (!empty($comment["image_path"])) : ?>
                             <img src="<?php echo $comment["image_path"]; ?>" alt="uploaded_image">
                         <?php endif; ?>
+                        <?php if ($comment['user_id'] == $_SESSION['user_id']) : ?>
+                            <form action="commentDelete.php"method="POST" onsubmit="return confirm('本当にこのコメントを削除しますか？');">
+                                <input type="hidden" name="delete_comment_id" value="<?php echo $comment['id']; ?>">
+                                <button type="submit" name="commentDelete">削除</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </article>
             <?php endforeach; ?>    
@@ -198,7 +170,6 @@ $nextPageLink = $pageNum < ceil($total / $pageSize) ? '?page=' . ($pageNum + 1) 
             <?php if ($prevPageLink): ?>
                 <a href="<?php echo $prevPageLink; ?>"><</a>
             <?php endif; ?>
-            <!-- foreach (要素を取り出す配列 as 配列から取り出した要素を格納する変数) -->
             <?php foreach ($pageList as $page): ?>
                 <?php if ($page == $pageNum): ?>
                     <a href="?page=<?php echo $page; ?>" class="active"><?php echo $page; ?></a>
@@ -206,7 +177,6 @@ $nextPageLink = $pageNum < ceil($total / $pageSize) ? '?page=' . ($pageNum + 1) 
                     <a href="?page=<?php echo $page; ?>"><?php echo $page; ?></a>
                 <?php endif; ?>
             <?php endforeach; ?>
-
             <?php if ($nextPageLink): ?>
                 <a href="<?php echo $nextPageLink; ?>">></a>
             <?php endif; ?>

@@ -1,10 +1,6 @@
 <?php 
 require("./dbconnect.php");
-session_start();//一時的にクライアント情報を保存するため？
-//1.フォームから名前・アドレス・パスワードをデータベースへ登録する。
-//2.メールアドレスの重複がないか確認
-//3.登録したユーザー情報をもとにログイン
-
+session_start();
 if (!empty($_POST)) {
     if ($_POST['email'] === "") {
         $error['email'] = "blank";
@@ -12,7 +8,6 @@ if (!empty($_POST)) {
     if ($_POST['password'] === "") {
         $error['password'] = "blank";
     }
-    
     if (!isset($error)) {
         $member = $db->prepare('SELECT COUNT(*) as cnt FROM members WHERE email=?');
         $member->execute(array(
@@ -23,7 +18,6 @@ if (!empty($_POST)) {
             $error['email'] = 'duplicate';
         }
     }
-
     if (empty($error)) {
         $_SESSION['join'] = $_POST;
         header('Location: check.php');
@@ -38,17 +32,15 @@ if (!empty($_POST)) {
     <title>アカウント作成</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="">
+<body>
     <div class="content">
         <form action="" method="POST" class="form">
             <h1>アカウント作成</h1>
             <p>当サービスをご利用するために、次のフォームに必要事項をご記入ください。</p>
             <br>
-
             <div class="control">
                 <input id="name" type="text" name="name" placeholder="ユーザー名">
             </div>
-
             <div class="control">
                 <input id="email" type="email" name="email" placeholder="メールアドレス">
                 <?php if (!empty($error["email"]) && $error['email'] === 'blank'): ?>
@@ -57,14 +49,12 @@ if (!empty($_POST)) {
                     <p class="error">＊このメールアドレスはすでに登録済みです</p>
                 <?php endif ?>
             </div>
-
             <div class="control">
                 <input id="password" type="password" name="password" placeholder="パスワード">
                 <?php if (!empty($error["password"]) && $error['password'] === 'blank'): ?>
                     <p class="error">＊パスワードを入力してください</p>
                 <?php endif ?>
             </div>
-
             <div class="control">
                 <button type="submit" class="btn">確認する</button>
             </div>
